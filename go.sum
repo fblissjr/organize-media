@@ -1,0 +1,4 @@
+github.com/bep/imagemeta v0.17.0 h1:0sCIQTcmERGUCazrBfmoeh7SoHutlYQqLr24GCItTxA=
+github.com/bep/imagemeta v0.17.0/go.mod h1:+Hlp195TfZpzsqCxtDKTG6eWdyz2+F2V/oCYfr3CZKA=
+golang.org/x/text v0.34.0 h1:oL/Qq0Kdaqxa1KbNeMKwQq0reLCCaFtqu2eNuSeNHbk=
+golang.org/x/text v0.34.0/go.mod h1:homfLqTYRFyVYemLBFl5GgL/DWEiH5wcsQ5gSh1yziA=
