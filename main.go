@@ -20,7 +20,7 @@ func main() {
 	flag.BoolVar(&cfg.Force, "force", false, "Rename files even if they already match naming pattern")
 	flag.BoolVar(&cfg.NoDedup, "no-dedup", false, "Skip dedup checking")
 	flag.BoolVar(&cfg.VerifyFull, "verify-full", false, "Full SHA256 verification after partial hash match")
-	flag.BoolVar(&cfg.RebuildDB, "rebuild-db", false, "Force rebuild dedup database")
+	flag.BoolVar(&cfg.RebuildDB, "rebuild-cache", false, "Force rebuild dedup cache")
 	flag.BoolVar(&cfg.Verbose, "verbose", false, "Detailed progress on stderr")
 	flag.BoolVar(&showVersion, "version", false, "Print version and exit")
 

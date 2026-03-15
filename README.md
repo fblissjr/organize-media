@@ -71,7 +71,7 @@ organize-media -verbose ~/Photos
 | `-force` | `false` | Rename files even if they already match naming pattern |
 | `-no-dedup` | `false` | Skip dedup checking |
 | `-verify-full` | `false` | Full SHA256 after partial hash match |
-| `-rebuild-db` | `false` | Force rebuild dedup cache |
+| `-rebuild-cache` | `false` | Force rebuild dedup cache |
 | `-verbose` | `false` | Detailed progress on stderr |
 | `-version` | | Print version and exit |
 

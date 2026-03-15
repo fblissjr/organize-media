@@ -4,10 +4,10 @@
 
 - Initial Go rewrite of organize_media.sh and rename_files.py
 - Single static binary with no external dependencies (exiftool, Python)
-- EXIF date extraction via pure-Go goexif library
+- EXIF date extraction via bep/imagemeta (HEIC/AVIF/JPEG/PNG/WebP/RAW)
 - QuickTime mvhd creation_time extraction for MP4/MOV
 - Filename regex date parsing fallback
-- Partial hash dedup with SQLite cache (modernc.org/sqlite, no CGO)
+- Partial hash dedup with gob-encoded file cache (no CGO)
 - Scoped directory indexing for NAS-optimized I/O
 - Two-pass pipeline: scan/plan then execute
 - Cross-device move detection with copy+verify+delete fallback
