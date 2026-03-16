@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- Fix "already in place" detection using os.SameFile instead of string comparison
+- Fix dedup self-match: files no longer flagged as duplicates of themselves when source=target
+- Dry-run output now prints target directory header and shows absolute target paths
+
 ## 0.1.0
 
 - Initial Go rewrite of organize_media.sh and rename_files.py

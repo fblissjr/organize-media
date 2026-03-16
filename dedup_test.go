@@ -135,6 +135,46 @@ func TestDedupCache(t *testing.T) {
 	}
 }
 
+func TestIsDuplicateSelfMatch(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a file and add it to the cache
+	f, p := createTestFile(t, filepath.Join(dir, "photo.jpg"), 500)
+	f.Close()
+	h, err := partialHash(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cache, err := NewDedupCache(dir, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cache.Insert(p, h, 500, 1234567890)
+
+	// IsDuplicate with sourcePath == the cached file should NOT match
+	isDup, _, err := cache.IsDuplicate(h, 500, false, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if isDup {
+		t.Error("file should not be flagged as duplicate of itself")
+	}
+
+	// But a different sourcePath should still match
+	other := filepath.Join(dir, "other.jpg")
+	isDup, match, err := cache.IsDuplicate(h, 500, false, other)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isDup {
+		t.Error("should detect duplicate for different source")
+	}
+	if match != p {
+		t.Errorf("match = %q, want %q", match, p)
+	}
+}
+
 func TestDedupCacheEnsureIndexed(t *testing.T) {
 	dir := t.TempDir()
 	mediaDir := filepath.Join(dir, "media")

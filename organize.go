@@ -155,7 +155,8 @@ func planFile(path, targetDir string, cfg Config, dedup *DedupCache) Action {
 	targetPath := filepath.Join(targetDirFull, targetName)
 
 	// Skip if source == target (already in the right place)
-	if path == targetPath {
+	// Use os.SameFile to compare by inode+device, immune to symlinks/case/mount differences
+	if targetInfo, err := os.Stat(targetPath); err == nil && os.SameFile(info, targetInfo) {
 		a.Skip = true
 		a.SkipReason = "already in place"
 		return a
@@ -234,6 +235,7 @@ func execute(actions []Action, targetDir string, cfg Config, dedup *DedupCache) 
 
 	// Dry-run mode
 	if cfg.DryRun {
+		fmt.Fprintf(os.Stderr, "target: %s\n\n", targetDir)
 		var moved, skipped int
 		for _, a := range actions {
 			if a.Skip {
@@ -244,8 +246,7 @@ func execute(actions []Action, targetDir string, cfg Config, dedup *DedupCache) 
 				continue
 			}
 			moved++
-			rel, _ := filepath.Rel(targetDir, a.TargetPath)
-			fmt.Printf("%s -> %s\n", a.SourcePath, rel)
+			fmt.Printf("%s -> %s\n", a.SourcePath, a.TargetPath)
 		}
 		fmt.Fprintf(os.Stderr, "\ndry-run: %d would move, %d would skip\n", moved, skipped)
 		return nil

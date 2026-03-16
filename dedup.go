@@ -172,7 +172,7 @@ func (c *DedupCache) IsDuplicate(partialH string, size int64, verifyFull bool, s
 		}
 		clean = append(clean, rec)
 
-		if found || rec.Size != size {
+		if found || rec.Size != size || rec.Path == sourcePath {
 			continue
 		}
 

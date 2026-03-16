@@ -225,6 +225,43 @@ func TestOrganizeWithDedup(t *testing.T) {
 	}
 }
 
+func TestOrganizeAlreadyInPlace(t *testing.T) {
+	dir := t.TempDir()
+
+	// Pre-create the directory structure as if files were already organized
+	subdir := filepath.Join(dir, "2026", "03")
+	os.MkdirAll(subdir, 0o755)
+
+	f, _ := createTestFile(t, filepath.Join(subdir, "IMG_20260315_120000.jpg"), 100)
+	f.Close()
+
+	cfg := Config{
+		SourceDir:   dir,
+		Granularity: "month",
+		NoDedup:     true,
+	}
+
+	err := organize(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// File should still be at original location, not moved or renamed
+	if _, err := os.Stat(filepath.Join(subdir, "IMG_20260315_120000.jpg")); err != nil {
+		t.Error("file should still be at original location")
+	}
+
+	// Should be exactly 1 file -- no collision copies
+	entries, _ := os.ReadDir(subdir)
+	if len(entries) != 1 {
+		names := make([]string, len(entries))
+		for i, e := range entries {
+			names[i] = e.Name()
+		}
+		t.Errorf("expected 1 file in subdir, got %d: %v", len(entries), names)
+	}
+}
+
 func TestOrganizeGranularity(t *testing.T) {
 	for _, gran := range []string{"year", "month", "day"} {
 		t.Run(gran, func(t *testing.T) {
