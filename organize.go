@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -21,14 +23,18 @@ type Config struct {
 	VideoPrefix string
 	DryRun      bool
 	Force       bool
+	NoRename    bool
 	NoDedup     bool
 	VerifyFull  bool
 	RebuildDB   bool
 	Verbose     bool
 }
 
-// strictPattern matches the rename pattern: prefix__YYYYMMDD_HHMMSS[_N].ext
-var strictPattern = regexp.MustCompile(`^[A-Za-z0-9_-]+__\d{8}_\d{6}(_\d+)?\.[^.]+$`)
+// prefixPattern matches the prefix rename format: prefix__YYYYMMDD_HHMMSS[_N].ext
+var prefixPattern = regexp.MustCompile(`^[A-Za-z0-9_-]+__\d{8}_\d{6}(_\d+)?\.[^.]+$`)
+
+// datetimePattern matches the default rename format: YYYYMMDD_HHMMSS[_suffix].ext
+var datetimePattern = regexp.MustCompile(`^\d{8}_\d{6}(_[a-z0-9]+)?\.[^.]+$`)
 
 // organize runs the two-pass pipeline.
 func organize(cfg Config) error {
@@ -99,12 +105,19 @@ func planFile(path, targetDir string, cfg Config, dedup *DedupCache) Action {
 		FileMtime:  info.ModTime().Unix(),
 	}
 
-	// Check if already matches strict naming pattern (skip unless --force)
+	// Check if already matches naming pattern (skip unless --force)
 	prefix := choosePrefix(mtype, cfg)
-	if prefix != "" && strictPattern.MatchString(name) && !cfg.Force {
-		a.Skip = true
-		a.SkipReason = "already named"
-		return a
+	if !cfg.Force && !cfg.NoRename {
+		if prefix != "" && prefixPattern.MatchString(name) {
+			a.Skip = true
+			a.SkipReason = "already named"
+			return a
+		}
+		if prefix == "" && datetimePattern.MatchString(name) {
+			a.Skip = true
+			a.SkipReason = "already named"
+			return a
+		}
 	}
 
 	// Extract date
@@ -144,12 +157,14 @@ func planFile(path, targetDir string, cfg Config, dedup *DedupCache) Action {
 		}
 	}
 
-	// Compute target path
+	// Compute target name
 	var targetName string
-	if prefix != "" {
-		targetName = buildFilename(prefix, date, strings.ToLower(ext))
-	} else {
+	if cfg.NoRename {
 		targetName = name
+	} else if prefix != "" {
+		targetName = buildPrefixFilename(prefix, date, strings.ToLower(ext))
+	} else {
+		targetName = buildDefaultFilename(date, strings.ToLower(ext))
 	}
 
 	targetPath := filepath.Join(targetDirFull, targetName)
@@ -199,8 +214,20 @@ func targetSubdir(t time.Time, granularity string) string {
 	}
 }
 
-func buildFilename(prefix string, t time.Time, ext string) string {
+func buildPrefixFilename(prefix string, t time.Time, ext string) string {
 	return fmt.Sprintf("%s__%s%s", prefix, t.Format("20060102_150405"), ext)
+}
+
+func buildDefaultFilename(t time.Time, ext string) string {
+	return fmt.Sprintf("%s_%s%s", t.Format("20060102_150405"), randomHex(4), ext)
+}
+
+func randomHex(n int) string {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+	return hex.EncodeToString(b)
 }
 
 // resolveCollision finds a unique filename by appending _N if the target exists.

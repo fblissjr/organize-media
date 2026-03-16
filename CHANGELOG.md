@@ -2,6 +2,9 @@
 
 ## 0.1.1
 
+- Default rename: files are renamed to `YYYYMMDD_HHMMSS_<8hex>.ext` (random suffix for uniqueness)
+- Add `-no-rename` flag to preserve original filenames (old default behavior)
+- Add `-p` prefix format documented in help: `PREFIX__YYYYMMDD_HHMMSS.ext`
 - Fix "already in place" detection using os.SameFile instead of string comparison
 - Fix dedup self-match: files no longer flagged as duplicates of themselves when source=target
 - Dry-run output now prints target directory header and shows absolute target paths

@@ -13,11 +13,12 @@ func main() {
 	var showVersion bool
 
 	flag.StringVar(&cfg.Granularity, "g", "month", "Granularity: year, month, day")
-	flag.StringVar(&cfg.Prefix, "p", "", "Rename prefix for all files (empty = preserve original name)")
+	flag.StringVar(&cfg.Prefix, "p", "", "Rename prefix (format: PREFIX__YYYYMMDD_HHMMSS.ext)")
 	flag.StringVar(&cfg.ImagePrefix, "image-prefix", "", "Rename prefix for images (overrides -p)")
 	flag.StringVar(&cfg.VideoPrefix, "video-prefix", "", "Rename prefix for videos (overrides -p)")
 	flag.BoolVar(&cfg.DryRun, "dry-run", false, "Preview without acting")
 	flag.BoolVar(&cfg.Force, "force", false, "Rename files even if they already match naming pattern")
+	flag.BoolVar(&cfg.NoRename, "no-rename", false, "Preserve original filenames")
 	flag.BoolVar(&cfg.NoDedup, "no-dedup", false, "Skip dedup checking")
 	flag.BoolVar(&cfg.VerifyFull, "verify-full", false, "Full SHA256 verification after partial hash match")
 	flag.BoolVar(&cfg.RebuildDB, "rebuild-cache", false, "Force rebuild dedup cache")
@@ -26,7 +27,8 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: organize-media [flags] <source-dir> [target-dir]\n\n")
-		fmt.Fprintf(os.Stderr, "Organize media files into date-based directory structure with deduplication.\n\n")
+		fmt.Fprintf(os.Stderr, "Organize media files into date-based directory structure with deduplication.\n")
+		fmt.Fprintf(os.Stderr, "Files are renamed to YYYYMMDD_HHMMSS_<random>.ext by default.\n\n")
 		fmt.Fprintf(os.Stderr, "Flags:\n")
 		flag.PrintDefaults()
 	}
